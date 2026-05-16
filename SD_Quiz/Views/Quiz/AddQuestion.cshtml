@@ -1,0 +1,46 @@
+﻿@model SD_Quiz.Models.Question
+@{
+    ViewData["Title"] = "Soruları Ekle";
+}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success text-center">@TempData["Success"]</div>
+        }
+        <div class="card shadow border-primary">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">🧠 "@ViewBag.CategoryName" İçin Soru Ekle</h4>
+                <span class="badge bg-light text-primary fs-6">Soru Sayısı: @ViewBag.CurrentQuestionCount</span>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="AddQuestion" method="post">
+                    <input type="hidden" name="CategoryId" value="@ViewBag.CategoryId" />
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Soru Görsel Linki (URL)</label>
+                        <input type="url" name="ImageUrl" class="form-control" required />
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6"><label class="form-label">A Şıkkı</label><input type="text" name="OptionA" class="form-control" required /></div>
+                        <div class="col-md-6"><label class="form-label">B Şıkkı</label><input type="text" name="OptionB" class="form-control" required /></div>
+                        <div class="col-md-6"><label class="form-label">C Şıkkı</label><input type="text" name="OptionC" class="form-control" required /></div>
+                        <div class="col-md-6"><label class="form-label">D Şıkkı</label><input type="text" name="OptionD" class="form-control" required /></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-danger">Doğru Şık Hangisi?</label>
+                        <select name="CorrectAnswer" class="form-select" required>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6"><button type="submit" name="actionType" value="addMore" class="btn btn-outline-primary btn-lg w-100">➕ Kaydet & Yeni Soru Ekle</button></div>
+                        <div class="col-md-6"><button type="submit" name="actionType" value="finish" class="btn btn-success btn-lg w-100">✅ Quizi Bitir ve Yayınla</button></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

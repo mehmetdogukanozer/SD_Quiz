@@ -1,51 +1,143 @@
-﻿@model List<SD_Quiz.Models.Category>
-
+﻿@model List<SD_Quiz.Controllers.CategoryRatingViewModel>
 @{
     ViewData["Title"] = "Ana Sayfa - Dashboard";
+    var leaderboardToday = ViewBag.LeaderboardToday as List<SD_Quiz.Controllers.LeaderboardViewModel>;
+    var leaderboardWeekly = ViewBag.LeaderboardWeekly as List<SD_Quiz.Controllers.LeaderboardViewModel>;
 }
 
-<div class="container mt-4">
-    <div class="p-5 mb-4 bg-light rounded-3 shadow-sm border">
-        <div class="container-fluid py-2">
-            <h1 class="display-5 fw-bold text-primary">Hoş geldin, @ViewBag.Username!</h1>
-            <p class="col-md-8 fs-4 text-muted">Bugünkü yarışma haklarını kullanmak ve liderlik tablosunda yükselmek için bir kategori seç.</p>
+<style>
+    /* Kartların üzerine mouse ile gelince yukarı hafif kalkma ve gölge efekti */
+    .hover-card { 
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+    }
+    .hover-card:hover { 
+        transform: translateY(-5px); 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; 
+    }
+    /* Hoş geldin bannerı için modern mavi gradient arkaplan */
+    .bg-gradient-primary { 
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%); 
+    }
+</style>
 
-            <div class="d-flex gap-3 mt-3">
-                <span class="badge bg-dark fs-5 p-2">🏆 Toplam Puan: @ViewBag.TotalPoints</span>
-                <span class="badge bg-warning text-dark fs-5 p-2">⭐ Rütbe: @ViewBag.Rank</span>
+<div class="container mt-4">
+    <div class="p-5 mb-4 rounded-4 shadow-sm bg-gradient-primary text-white">
+        <div class="container-fluid py-1">
+            <h1 class="display-5 fw-bold mb-3">Hoş geldin, @ViewBag.Username! 👋</h1>
+            <p class="fs-5 opacity-75">Yarışmak için bir kategori seç, liderlik tablosunda yerini al.</p>
+            <div class="d-flex gap-3 mt-4">
+                <span class="badge bg-light text-primary fs-6 py-2 px-3 shadow-sm rounded-pill">🏆 Toplam Puan: @ViewBag.TotalPoints</span>
+                <span class="badge bg-warning text-dark fs-6 py-2 px-3 shadow-sm rounded-pill">⭐ Rütbe: @ViewBag.Rank</span>
             </div>
         </div>
     </div>
 
-    <h2 class="mb-4 border-bottom pb-2">Oyun Kategorileri</h2>
+    @if (TempData["Warning"] != null) 
+    { 
+        <div class="alert alert-warning text-center rounded-3 shadow-sm mb-4">
+            ⚠️ @TempData["Warning"]
+        </div> 
+    }
+    @if (TempData["Success"] != null) 
+    { 
+        <div class="alert alert-success text-center rounded-3 shadow-sm mb-4">
+            ✅ @TempData["Success"]
+        </div> 
+    }
 
-    <div class="row">
-        @if (Model == null || !Model.Any())
-        {
-            <div class="col-12">
-                <div class="alert alert-info text-center fs-5">
-                    📌 Şu anda veritabanında aktif kategori bulunmamaktadır. (Admin paneli veya seeding bekleniyor).
-                </div>
-            </div>
-        }
-        else
-        {
-            @foreach (var category in Model)
-            {
-                <div class="col-md-6 mb-4">
-                    <div class="card h-100 shadow-sm border-primary">
-                        <div class="card-body d-flex flex-column justify-content-between">
-                            <div>
-                                <h4 class="card-title fw-bold text-dark">@category.Name</h4>
-                                <p class="card-text text-muted">Bu kategorideki resimli soruları çözerek puanları topla. Dikkat et, günde sadece 1 kez oynama hakkın var!</p>
-                            </div>
-                            <div class="d-grid mt-4">
-                                <a href="/Quiz/Start?categoryId=@category.Id" class="btn btn-primary btn-lg fw-bold">Yarışmayı Başlat 🚀</a>
-                            </div>
+    <div class="row g-4">
+        <div class="col-md-8">
+            <h3 class="mb-3 fw-bold text-dark border-bottom pb-2">Oyun Kategorileri</h3>
+            <div class="row g-3">
+                @if (Model == null || !Model.Any())
+                {
+                    <div class="col-12">
+                        <div class="alert alert-info text-center rounded-3">
+                            📌 Şu anda aktif veya onaylanmış bir oyun kategorisi bulunmuyor.
                         </div>
                     </div>
+                }
+                else
+                {
+                    @foreach (var category in Model)
+                    {
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm rounded-4 hover-card p-2">
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <h5 class="card-title fw-bold text-primary mb-2 d-flex justify-content-between align-items-center">
+                                            <span>
+                                                @category.Name
+                                                @if (ViewBag.FavoriteCategoryId != null && ViewBag.FavoriteCategoryId == category.Id)
+                                                {
+                                                    <span class="badge bg-danger fs-6 ms-2 rounded-pill" style="font-size:0.7rem !important">❤️ Favorin</span>
+                                                }
+                                            </span>
+                                            <span class="badge bg-warning text-dark fs-6 rounded-pill shadow-sm">
+                                                ★ @category.AvgRating.ToString("0.0")
+                                            </span>
+                                        </h5>
+                                        <p class="text-muted small">Resimli soruları çöz, puanları topla! Günde 1 kez oynama hakkın var.</p>
+                                    </div>
+                                    <div class="d-grid mt-3">
+                                        <a href="/Quiz/Start?categoryId=@category.Id" class="btn btn-outline-primary fw-bold rounded-pill">Yarışmayı Başlat 🚀</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div style="position: sticky; top: 20px;">
+                <h3 class="mb-3 fw-bold text-dark border-bottom pb-2">🏆 En İyiler</h3>
+                
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-success text-white fw-bold rounded-top-4 py-3">🔥 Bugünün Liderleri</div>
+                    <ul class="list-group list-group-flush rounded-bottom-4">
+                        @if (leaderboardToday == null || !leaderboardToday.Any())
+                        {
+                            <li class="list-group-item text-muted text-center py-4 border-0">Henüz yarışan olmadı. İlk sen ol!</li>
+                        }
+                        else
+                        {
+                            int siraToday = 1;
+                            @foreach (var user in leaderboardToday)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom py-3">
+                                    <span><strong class="text-muted me-2">#@siraToday</strong> <span class="fw-bold">@user.Username</span></span>
+                                    <span class="badge bg-success rounded-pill px-3 py-2">@user.TotalPoints Puan</span>
+                                </li>
+                                siraToday++;
+                            }
+                        }
+                    </ul>
                 </div>
-            }
-        }
+
+                <div class="card border-0 shadow-sm rounded-4">
+                    <div class="card-header bg-dark text-white fw-bold rounded-top-4 py-3">📅 Bu Hafta (Son 7 Gün)</div>
+                    <ul class="list-group list-group-flush rounded-bottom-4">
+                        @if (leaderboardWeekly == null || !leaderboardWeekly.Any())
+                        {
+                            <li class="list-group-item text-muted text-center py-4 border-0">Henüz kayıtlı skor bulunmuyor.</li>
+                        }
+                        else
+                        {
+                            int siraWeekly = 1;
+                            @foreach (var user in leaderboardWeekly)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center border-0 border-bottom py-3">
+                                    <span><strong class="text-muted me-2">#@siraWeekly</strong> <span class="fw-bold">@user.Username</span></span>
+                                    <span class="badge bg-dark rounded-pill px-3 py-2">@user.TotalPoints Puan</span>
+                                </li>
+                                siraWeekly++;
+                            }
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

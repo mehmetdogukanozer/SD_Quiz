@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using SD_Quiz.Data;
 using SD_Quiz.Models;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SD_Quiz.Controllers
 {
@@ -9,33 +12,31 @@ namespace SD_Quiz.Controllers
     {
         private readonly AppDbContext _context;
 
-        // Veritabanı bağlantımızı Controller içine enjekte ediyoruz (Dependency Injection)
         public AccountController(AppDbContext context)
         {
             _context = context;
         }
 
-        // ================= KULLANICI KAYIT (REGISTER) =================
-
-        // Kayıt Ol sayfasını ekrana getiren action
-        [HttpGet]
-        public IActionResult Register()
+        // ================= ŞİFRELEME (HASHING) METODU =================
+        private string HashPassword(string password)
         {
-            return View();
+            using (SHA256 sha256Hash = SHA256.Create())
+            {
+                byte[] bytes = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(password));
+                StringBuilder builder = new StringBuilder();
+                for (int i = 0; i < bytes.Length; i++) builder.Append(bytes[i].ToString("x2"));
+                return builder.ToString(); // Örn: e10adc3949ba59... gibi karmaşık bir metin üretir
+            }
         }
 
-        // Kayıt Ol butonuna basıldığında çalışan action
+        [HttpGet]
+        public IActionResult Register() { return View(); }
+
         [HttpPost]
         public IActionResult Register(User user)
         {
-            // C# modelindeki [Required] kurallarına uyulmuş mu (kutular dolu mu) kontrol et
-            if (!ModelState.IsValid)
-            {
-                // Eğer kutular boşsa, veritabanına hiç gitme, sayfayı uyarılarla birlikte geri yükle
-                return View(user);
-            }
+            if (!ModelState.IsValid) return View(user);
 
-            // 1. Aynı kullanıcı adından veritabanında var mı kontrol et
             var existingUser = _context.Users.FirstOrDefault(u => u.Username == user.Username);
             if (existingUser != null)
             {
@@ -43,49 +44,43 @@ namespace SD_Quiz.Controllers
                 return View(user);
             }
 
-            // 2. Her şey yolundaysa kullanıcıyı veritabanına ekle
+            // KULLANICININ ŞİFRESİNİ VERİTABANINA YAZMADAN ÖNCE KRİPTOLUYORUZ! 🔒
+            user.Password = HashPassword(user.Password);
+
             _context.Users.Add(user);
             _context.SaveChanges();
 
             return RedirectToAction("Login");
         }
-        
 
-        // ================= KULLANICI GİRİŞİ (LOGIN) =================
-
-        // Giriş Yap sayfasını ekrana getiren action
         [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() { return View(); }
 
-        // Giriş Yap butonuna basıldığında çalışan action
         [HttpPost]
         public IActionResult Login(string username, string password)
         {
-            // Veritabanında kullanıcı adı ve şifre eşleşiyor mu bak
-            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password);
+            // GİRİLEN ŞİFREYİ KRİPTOLAYIP VERİTABANINDAKİ KRİPTOLU HALİYLE KARŞILAŞTIRIYORUZ 🔒
+            string hashedPassword = HashPassword(password);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == hashedPassword);
 
             if (user != null)
             {
-                // Giriş başarılı! Kullanıcının ID ve Isim bilgisini Session'a atıyoruz
                 HttpContext.Session.SetInt32("UserId", user.Id);
                 HttpContext.Session.SetString("Username", user.Username);
 
-                // Kullanıcıyı ana sayfaya gönder
+                // KULLANICI ADMİN Mİ KONTROLÜ
+                HttpContext.Session.SetString("IsAdmin", user.IsAdmin.ToString());
+
                 return RedirectToAction("Index", "Home");
             }
 
-            // Giriş başarısızsa ekrana hata mesajı gönder
             ViewBag.Error = "Hatalı kullanıcı adı veya şifre!";
             return View();
         }
 
-        // ================= ÇIKIŞ YAP (LOGOUT) =================
         public IActionResult Logout()
         {
-            HttpContext.Session.Clear(); // Tüm oturum verilerini sil
+            HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
     }

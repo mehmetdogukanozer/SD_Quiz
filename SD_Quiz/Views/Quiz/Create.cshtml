@@ -1,0 +1,19 @@
+﻿@{
+    ViewData["Title"] = "Yeni Quiz Başlat";
+}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow border-success">
+            <div class="card-header bg-success text-white text-center py-3"><h3>🚀 Yeni Bir Quiz Oluştur</h3></div>
+            <div class="card-body p-4">
+                <form asp-action="Create" method="post">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold fs-5">Quizinizin Adı / Konusu ne olacak?</label>
+                        <input type="text" name="categoryName" class="form-control form-control-lg" placeholder="Örn: Marvel, Coğrafya vb." required />
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg w-100">Sonraki Adım: Soruları Ekle ➡️</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

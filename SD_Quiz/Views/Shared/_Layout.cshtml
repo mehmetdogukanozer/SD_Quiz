@@ -22,11 +22,26 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+                            <a class="nav-link text-dark fw-bold" asp-controller="Home" asp-action="Index">🏠 Ana Sayfa</a>
                         </li>
+                        @if (Context.Session.GetInt32("UserId") != null)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-success fw-bold" asp-controller="Quiz" asp-action="Create">✨ Quiz Oluştur</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-primary fw-bold" asp-controller="Home" asp-action="MyProfile">👤 Profilim</a>
+                            </li>
+                        }
                     </ul>
 
                     <ul class="navbar-nav">
+                        @if (Context.Session.GetString("IsAdmin") == "True")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">🛡️ Admin Paneli</a>
+                            </li>
+                        }
                         @if (Context.Session.GetInt32("UserId") != null)
                         {
                             <li class="nav-item">

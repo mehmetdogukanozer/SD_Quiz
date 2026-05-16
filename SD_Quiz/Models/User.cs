@@ -13,6 +13,11 @@ namespace SD_Quiz.Models
 
         [Required(ErrorMessage = "Şifre boş geçilemez.")]
         public string Password { get; set; }
+        public bool IsAdmin { get; set; } = false; // Kullanıcı admin mi?
+
+        // Models/User.cs dosyasının içine, diğer property'lerin altına ekle:
+        public string? Bio { get; set; } = "Henüz bir biyografi girilmemiş.";
+        public string? AvatarUrl { get; set; } = "https://cdn-icons-png.flaticon.com/512/847/847969.png"; // Varsayılan avatar
 
         public DateTime CreatedDate { get; set; } = DateTime.Now;
 

@@ -1,0 +1,72 @@
+﻿@model SD_Quiz.Models.User
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="container mt-4">
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success text-center">@TempData["Success"]</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow border-0 text-center p-3">
+                <div class="card-body">
+                    <img src="@Model.AvatarUrl" alt="Avatar" class="rounded-circle img-thumbnail mb-3 shadow" style="width: 130px; height: 130px; object-fit: cover;" />
+                    <h3 class="fw-bold text-dark">@Model.Username</h3>
+                    <p class="text-muted fst-italic">"@Model.Bio"</p>
+                    <hr />
+                    <h5 class="text-start text-primary fw-bold mb-3">⚙️ Profili Düzenle</h5>
+                    <form asp-action="UpdateProfile" method="post" class="text-start">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Hakkımda</label>
+                            <textarea name="bio" class="form-control form-control-sm" rows="2">@Model.Bio</textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small">Avatar Seçin</label>
+                            <select name="avatarUrl" class="form-select form-select-sm">
+                                <option value="https://cdn-icons-png.flaticon.com/512/4140/4140037.png">👨‍💻 Yazılımcı Çocuk</option>
+                                <option value="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">👩‍💻 Yazılımcı Kız</option>
+                                <option value="https://cdn-icons-png.flaticon.com/512/194/194938.png">🦊 Kurnaz Tilki</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Kaydet</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="row g-3 mb-4">
+                <div class="col-md-4"><div class="card bg-primary text-white text-center py-3"><h4>@ViewBag.GamesPlayed</h4><span>Çözülen Quiz</span></div></div>
+                <div class="col-md-4"><div class="card bg-success text-white text-center py-3"><h4>@ViewBag.AverageScore</h4><span>Ortalama Skor</span></div></div>
+                <div class="col-md-4"><div class="card bg-warning text-dark text-center py-3"><h4>@ViewBag.HighestScore</h4><span>En Yüksek Skor</span></div></div>
+            </div>
+
+            <h4 class="mb-3 border-bottom pb-2 fw-bold text-secondary">🎮 Son Aktivite Geçmişi</h4>
+            <div class="card shadow-sm border-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark"><tr><th>Tarih</th><th>Kategori</th><th class="text-end">Puan</th></tr></thead>
+                    <tbody>
+                        @if (Model.Scores == null || !Model.Scores.Any())
+                        {
+                            <tr><td colspan="3" class="text-center py-4 text-muted">Henüz hiç yarışmaya katılmadın.</td></tr>
+                        }
+                        else
+                        {
+                            @foreach (var score in Model.Scores)
+                            {
+                                <tr>
+                                    <td>@score.DatePlayed.ToString("dd.MM.yyyy")</td>
+                                    <td class="fw-bold">@score.Category?.Name</td>
+                                    <td class="text-end"><span class="badge bg-success fs-6">@score.PointsEarned Puan</span></td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

@@ -40,5 +40,10 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<SD_Quiz.Data.AppDbContext>();
+    SD_Quiz.Data.DbSeeder.Seed(context);
+}
 
 app.Run();

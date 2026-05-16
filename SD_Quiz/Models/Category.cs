@@ -14,5 +14,6 @@ namespace SD_Quiz.Models
         // Bir kategoriye ait birden fazla soru olabilir (İlişki tanımı)
         public List<Question>? Questions { get; set; }
         public List<Score>? Scores { get; set; }
+        public bool IsApproved { get; set; } = true; // Admin onayından geçti mi? (Eski quizler kaybolmasın diye varsayılan true yapıyoruz, yeniler false olacak)
     }
 }

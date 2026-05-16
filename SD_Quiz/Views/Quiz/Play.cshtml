@@ -1,0 +1,59 @@
+﻿@model SD_Quiz.Models.Question
+
+@{
+    ViewData["Title"] = "Yarışma Başladı";
+}
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-8">
+        <div class="progress mb-3" style="height: 25px;">
+            <div id="timerBar" class="progress-bar bg-danger progress-bar-striped progress-bar-animated fw-bold fs-6" role="progressbar" style="width: 100%;">
+                Süre: <span id="timeLeft" class="ms-1">15</span> sn
+            </div>
+        </div>
+
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Soru @ViewBag.CurrentQuestionNumber / @ViewBag.TotalQuestions</h5>
+                <span class="badge bg-warning text-dark fs-6">Hızlı Karar Ver!</span>
+            </div>
+            <div class="card-body text-center p-4">
+                
+                <div class="mb-4">
+                    <img src="@Model.ImageUrl" class="img-fluid rounded border shadow-sm" style="max-height: 400px; object-fit: cover;" />
+                </div>
+                <h4 class="mb-4">Bu görselin doğru cevabı nedir?</h4>
+
+                <form id="quizForm" asp-controller="Quiz" asp-action="Answer" method="post">
+                    <input type="hidden" name="questionId" value="@Model.Id" />
+                    <input type="hidden" id="selectedOption" name="selectedOption" value="BOS" /> <div class="row g-3">
+                    <div class="col-md-6"><button type="submit" onclick="document.getElementById('selectedOption').value='A'" class="btn btn-outline-primary btn-lg w-100 p-3 fw-bold">A) @Model.OptionA</button></div>
+                    <div class="col-md-6"><button type="submit" onclick="document.getElementById('selectedOption').value='B'" class="btn btn-outline-primary btn-lg w-100 p-3 fw-bold">B) @Model.OptionB</button></div>
+                    <div class="col-md-6"><button type="submit" onclick="document.getElementById('selectedOption').value='C'" class="btn btn-outline-primary btn-lg w-100 p-3 fw-bold">C) @Model.OptionC</button></div>
+                    <div class="col-md-6"><button type="submit" onclick="document.getElementById('selectedOption').value='D'" class="btn btn-outline-primary btn-lg w-100 p-3 fw-bold">D) @Model.OptionD</button></div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+    let timeLeft = 15;
+    let timerElement = document.getElementById('timeLeft');
+    let timerBar = document.getElementById('timerBar');
+
+    let countdown = setInterval(function() {
+        timeLeft--;
+        timerElement.innerText = timeLeft;
+        timerBar.style.width = (timeLeft / 15) * 100 + '%';
+
+        if (timeLeft <= 5) timerBar.classList.add('bg-dark'); // Son 5 saniyede renk koyulaşır
+
+        if (timeLeft <= 0) {
+            clearInterval(countdown);
+            document.getElementById('quizForm').submit(); // Süre bitince formu boş şıkla otomatik gönder
+        }
+    }, 1000);
+</script>

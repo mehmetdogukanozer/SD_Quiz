@@ -11,6 +11,7 @@ namespace SD_Quiz.Models
         public int CategoryId { get; set; } // Hangi kategoriyi oynadı?
 
         public int PointsEarned { get; set; } // Kaç puan aldı?
+        public int? Rating { get; set; } // 1 ile 5 arasında yıldız puanı tutacak (Boş bırakılabilir)
 
         public DateTime DatePlayed { get; set; } = DateTime.Today; // Saat bilgisi olmadan sadece bugünün tarihi
 
