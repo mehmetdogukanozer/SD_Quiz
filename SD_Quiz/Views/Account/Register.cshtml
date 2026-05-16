@@ -1,0 +1,38 @@
+﻿@model SD_Quiz.Models.User
+
+@{
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h3>SD_Quiz - Kayıt Ol</h3>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Username" class="form-label">Kullanıcı Adı</label>
+                        <input asp-for="Username" class="form-control" placeholder="Kullanıcı adınızı girin" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label asp-for="Password" class="form-label">Şifre</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Şifrenizi girin" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Kayıt Ol</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <a asp-action="Login" class="text-decoration-none">Zaten hesabın var mı? Giriş Yap</a>
+            </div>
+        </div>
+    </div>
+</div>
