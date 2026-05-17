@@ -137,8 +137,16 @@ namespace SD_Quiz.Controllers
         {
             if (string.IsNullOrEmpty(categoryName)) return View();
 
-            // Yeni oluşturulan quiz varsayılan olarak ONAYSIZ (IsApproved = false) başlar
-            var newCategory = new Category { Name = categoryName, IsApproved = false };
+            var userId = HttpContext.Session.GetInt32("UserId");
+
+            // Yeni oluşturulan quiz varsayılan olarak ONAYSIZ ve BEKLEMEDE başlar, oluşturan kişi kaydedilir.
+            var newCategory = new Category
+            {
+                Name = categoryName,
+                IsApproved = false,
+                Status = "Pending",
+                UserId = userId
+            };
 
             _context.Categories.Add(newCategory);
             _context.SaveChanges();
@@ -168,13 +176,15 @@ namespace SD_Quiz.Controllers
                 _context.SaveChanges();
             }
 
+            // DOĞRU MANTIK: Eğer daha fazla soru eklemek istiyorsa sayfada kalır
             if (actionType == "addMore")
             {
-                TempData["Success"] = "Tebrikler! Quiziniz sisteme eklendi. Admin onayından sonra ana sayfada yayınlanacaktır. ⏳";
+                TempData["Success"] = "Soru başarıyla eklendi! Yeni bir soru daha ekleyebilirsiniz.";
                 return RedirectToAction("AddQuestion", new { categoryId = question.CategoryId });
             }
 
-            TempData["Success"] = "Tebrikler! Quiziniz başarıyla yayınlandı. 🎉";
+            // Kullanıcı "Kaydet ve Bitir" dediğinde çalışacak kısım:
+            TempData["Success"] = "Tebrikler! Quiziniz başarıyla oluşturuldu ve admin onayına gönderildi! ⏳";
             return RedirectToAction("Index", "Home");
         }
     }

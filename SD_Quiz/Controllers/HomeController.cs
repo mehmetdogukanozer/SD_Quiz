@@ -1,7 +1,9 @@
+#nullable disable
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using SD_Quiz.Data;
+using SD_Quiz.Models;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -16,7 +18,6 @@ namespace SD_Quiz.Controllers
         {
             _context = context;
         }
-
         public IActionResult Index()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -43,15 +44,15 @@ namespace SD_Quiz.Controllers
             var today = DateTime.Today;
             ViewBag.LeaderboardToday = _context.Scores
                 .Where(s => s.DatePlayed == today)
-                .GroupBy(s => s.User.Username)
-                .Select(g => new LeaderboardViewModel { Username = g.Key, TotalPoints = g.Sum(s => s.PointsEarned) })
+                .GroupBy(s => new { s.UserId, s.User.Username })
+                .Select(g => new LeaderboardViewModel { UserId = g.Key.UserId, Username = g.Key.Username, TotalPoints = g.Sum(s => s.PointsEarned) })
                 .OrderByDescending(x => x.TotalPoints).Take(5).ToList();
 
             var sevenDaysAgo = DateTime.Today.AddDays(-7);
             ViewBag.LeaderboardWeekly = _context.Scores
                 .Where(s => s.DatePlayed >= sevenDaysAgo)
-                .GroupBy(s => s.User.Username)
-                .Select(g => new LeaderboardViewModel { Username = g.Key, TotalPoints = g.Sum(s => s.PointsEarned) })
+                .GroupBy(s => new { s.UserId, s.User.Username })
+                .Select(g => new LeaderboardViewModel { UserId = g.Key.UserId, Username = g.Key.Username, TotalPoints = g.Sum(s => s.PointsEarned) })
                 .OrderByDescending(x => x.TotalPoints).Take(5).ToList();
 
             // 3. ÖNE ÇIKAN / FAVORİ KATEGORİ
@@ -62,43 +63,66 @@ namespace SD_Quiz.Controllers
                 .Select(g => g.Key)
                 .FirstOrDefault();
 
-            // 4. QUİZLERİ PUANLARINA GÖRE SIRALAMA VE ONAYLI OLANLARI ÇEKME
+            // 4. QUİZLERİ PUANLARINA GÖRE SIRALAMA (Tercüme Hatası Veren Yer Tamamen Düzeltildi)
             var approvedCategories = _context.Categories
                 .Where(c => c.IsApproved == true)
-                .Include(c => c.Scores) // Puanları hesaplamak için skorları da çekiyoruz
                 .Select(c => new CategoryRatingViewModel
                 {
                     Id = c.Id,
                     Name = c.Name,
-                    AvgRating = c.Scores.Any(s => s.Rating != null) ? c.Scores.Where(s => s.Rating != null).Average(s => s.Rating).Value : 0
+                    AvgRating = c.Scores.Where(s => s.Rating != null).Average(s => s.Rating) ?? 0
                 })
                 .OrderByDescending(x => x.AvgRating) // En yüksek puanlı en üste
                 .ToList();
 
-            // Favori Kategori (Aynı Kalıyor)
-            ViewBag.FavoriteCategoryId = _context.Scores
-                .Where(s => s.UserId == userId)
-                .GroupBy(s => s.CategoryId)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .FirstOrDefault();
-
-            return View(approvedCategories); // Modeli View'e gönderiyoruz
+            return View(approvedCategories);
         }
 
-        // PROFIL SAYFASI (GET)
+        // KENDİ PROFIL SAYFASI (GET)
         [HttpGet]
         public IActionResult MyProfile()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
             if (userId == null) return RedirectToAction("Login", "Account");
 
+            // Sena'nın orijinal sorunsuz EF Core Include zinciri geri getirildi
             var user = _context.Users.Include(u => u.Scores).ThenInclude(s => s.Category).FirstOrDefault(u => u.Id == userId);
             var myScores = _context.Scores.Where(s => s.UserId == userId).ToList();
 
             ViewBag.GamesPlayed = myScores.Count;
             ViewBag.AverageScore = myScores.Any() ? Math.Round(myScores.Average(s => s.PointsEarned), 1) : 0;
             ViewBag.HighestScore = myScores.Any() ? myScores.Max(s => s.PointsEarned) : 0;
+
+            ViewBag.MyCreatedQuizzes = _context.Categories
+                .Include(c => c.Questions)
+                .Where(c => c.UserId == userId)
+                .ToList();
+
+            return View(user);
+        }
+
+        // DIŞARIDAN BİR KULLANICININ PROFİLİNİ GÖRME
+        [HttpGet]
+        public IActionResult UserProfile(int id)
+        {
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (currentUserId == null) return RedirectToAction("Login", "Account");
+
+            if (currentUserId == id) return RedirectToAction("MyProfile");
+
+            var user = _context.Users.Include(u => u.Scores).ThenInclude(s => s.Category).FirstOrDefault(u => u.Id == id);
+            if (user == null) return NotFound();
+
+            var userScores = _context.Scores.Where(s => s.UserId == id).ToList();
+
+            ViewBag.GamesPlayed = userScores.Count;
+            ViewBag.AverageScore = userScores.Any() ? Math.Round(userScores.Average(s => s.PointsEarned), 1) : 0;
+            ViewBag.HighestScore = userScores.Any() ? userScores.Max(s => s.PointsEarned) : 0;
+
+            ViewBag.MyCreatedQuizzes = _context.Categories
+                .Include(c => c.Questions)
+                .Where(c => c.UserId == id)
+                .ToList();
 
             return View(user);
         }
@@ -122,8 +146,10 @@ namespace SD_Quiz.Controllers
         }
     }
 
+    // KRİTİK GERİ KAZANIM: Projenin derlenmesini sağlayan modeller eklendi
     public class LeaderboardViewModel
     {
+        public int UserId { get; set; }
         public string Username { get; set; }
         public int TotalPoints { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+#nullable disable
 
 namespace SD_Quiz.Models
 {

@@ -3,6 +3,29 @@
     ViewData["Title"] = "Profilim";
 }
 
+<style>
+    .avatar-option {
+        transition: all 0.2s ease-in-out;
+        border: 3px solid transparent;
+        padding: 2px;
+        width: 65px;
+        height: 65px;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+        .avatar-option:hover {
+            transform: scale(1.15);
+        }
+
+        /* Seçilen avatarın etrafına mor parıltılı çerçeve ekler */
+        .avatar-option.selected-avatar {
+            border-color: #764ba2 !important;
+            box-shadow: 0 0 10px rgba(118, 75, 162, 0.5);
+            background-color: #f1f5f9;
+        }
+</style>
+
 <div class="container mt-4">
     @if (TempData["Success"] != null)
     {
@@ -18,19 +41,35 @@
                     <p class="text-muted fst-italic">"@Model.Bio"</p>
                     <hr />
                     <h5 class="text-start text-primary fw-bold mb-3">⚙️ Profili Düzenle</h5>
+
                     <form asp-action="UpdateProfile" method="post" class="text-start">
                         <div class="mb-3">
                             <label class="form-label fw-bold small">Hakkımda</label>
                             <textarea name="bio" class="form-control form-control-sm" rows="2">@Model.Bio</textarea>
                         </div>
+
                         <div class="mb-3">
-                            <label class="form-label fw-bold small">Avatar Seçin</label>
-                            <select name="avatarUrl" class="form-select form-select-sm">
-                                <option value="https://cdn-icons-png.flaticon.com/512/4140/4140037.png">👨‍💻 Yazılımcı Çocuk</option>
-                                <option value="https://cdn-icons-png.flaticon.com/512/4140/4140048.png">👩‍💻 Yazılımcı Kız</option>
-                                <option value="https://cdn-icons-png.flaticon.com/512/194/194938.png">🦊 Kurnaz Tilki</option>
-                            </select>
+                            <label class="form-label fw-bold small d-block mb-2">Avatar Seçin</label>
+                            <div class="d-flex gap-3 justify-content-center flex-wrap p-2 bg-light rounded-3 border">
+                                <img src="https://cdn-icons-png.flaticon.com/512/4140/4140037.png"
+                                     class="avatar-option rounded-circle"
+                                     title="Yazılımcı Çocuk"
+                                     onclick="selectAvatar(this, 'https://cdn-icons-png.flaticon.com/512/4140/4140037.png')" />
+
+                                <img src="https://cdn-icons-png.flaticon.com/512/4140/4140048.png"
+                                     class="avatar-option rounded-circle"
+                                     title="Yazılımcı Kız"
+                                     onclick="selectAvatar(this, 'https://cdn-icons-png.flaticon.com/512/4140/4140048.png')" />
+
+                                <img src="https://cdn-icons-png.flaticon.com/512/194/194938.png"
+                                     class="avatar-option rounded-circle"
+                                     title="Kurnaz Tilki"
+                                     onclick="selectAvatar(this, 'https://cdn-icons-png.flaticon.com/512/194/194938.png')" />
+                            </div>
+
+                            <input type="hidden" name="avatarUrl" id="avatarUrlInput" value="@Model.AvatarUrl" />
                         </div>
+
                         <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Kaydet</button>
                     </form>
                 </div>
@@ -45,7 +84,7 @@
             </div>
 
             <h4 class="mb-3 border-bottom pb-2 fw-bold text-secondary">🎮 Son Aktivite Geçmişi</h4>
-            <div class="card shadow-sm border-0">
+            <div class="card shadow-sm border-0 mb-4">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-dark"><tr><th>Tarih</th><th>Kategori</th><th class="text-end">Puan</th></tr></thead>
                     <tbody>
@@ -67,6 +106,75 @@
                     </tbody>
                 </table>
             </div>
+
+            <h4 class="mb-3 border-bottom pb-2 fw-bold text-secondary mt-5">✨ Oluşturduğum Quizler</h4>
+            <div class="card shadow-sm border-0">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Quiz Adı</th>
+                            <th class="text-center">Soru Sayısı</th>
+                            <th class="text-end">İnceleme Durumu</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.MyCreatedQuizzes == null || ((List<SD_Quiz.Models.Category>)ViewBag.MyCreatedQuizzes).Count == 0)
+                        {
+                            <tr><td colspan="3" class="text-center py-4 text-muted">Henüz sistemde oluşturduğun bir quiz bulunmuyor.</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var quiz in (List<SD_Quiz.Models.Category>)ViewBag.MyCreatedQuizzes)
+                            {
+                                <tr>
+                                    <td class="fw-bold text-dark">@quiz.Name</td>
+                                    <td class="text-center"><span class="badge bg-light text-dark border px-3 rounded-pill">@(quiz.Questions?.Count ?? 0) Soru</span></td>
+                                    <td class="text-end">
+                                        @if (quiz.Status == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold">⏳ Admine Gönderildi (Bekliyor)</span>
+                                        }
+                                        else if (quiz.Status == "Approved")
+                                        {
+                                            <span class="badge bg-success text-white px-3 py-2 rounded-pill fw-bold">✅ Onaylandı (Yayında)</span>
+                                        }
+                                        else if (quiz.Status == "Rejected")
+                                        {
+                                            <span class="badge bg-danger text-white px-3 py-2 rounded-pill fw-bold">❌ Reddedildi</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        function selectAvatar(element, url) {
+            // Önce tüm seçeneklerden aktif olan çerçeve sınıfını temizle
+            document.querySelectorAll('.avatar-option').forEach(img => {
+                img.classList.remove('selected-avatar');
+            });
+            // Tıklanan görsele çerçeve ekle
+            element.classList.add('selected-avatar');
+            // Gizli input alanının değerini seçilen URL ile güncelle
+            document.getElementById('avatarUrlInput').value = url;
+        }
+
+        // Sayfa yüklendiğinde kullanıcının mevcut avatarını bulup otomatik seçili getirir
+        document.addEventListener("DOMContentLoaded", function () {
+            var currentAvatarUrl = "@Model.AvatarUrl";
+            document.querySelectorAll('.avatar-option').forEach(img => {
+                if (img.getAttribute('src') === currentAvatarUrl) {
+                    img.classList.add('selected-avatar');
+                }
+            });
+        });
+    </script>
+}

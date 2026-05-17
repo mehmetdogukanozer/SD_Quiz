@@ -1,0 +1,60 @@
+﻿@model SD_Quiz.Models.Category
+@{
+    ViewData["Title"] = "Quiz Önizleme Paneli";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
+        <div>
+            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-2">⏳ Onay Bekliyor</span>
+            <h2 class="fw-bold text-dark mb-0">🔍 Quiz Önizleme: <span class="text-primary">@Model.Name</span></h2>
+        </div>
+        <a href="/Admin/Index" class="btn btn-outline-secondary fw-bold rounded-pill">⬅️ Listeye Geri Dön</a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="fw-bold text-secondary mb-3">🎮 İçerik Soruları (@(Model.Questions?.Count ?? 0) Soru)</h4>
+
+            @if (Model.Questions == null || !Model.Questions.Any())
+            {
+                <div class="alert alert-danger rounded-3 text-center fw-bold">⚠️ Bu quize henüz soru eklenmemiş!</div>
+            }
+            else
+            {
+                var qCount = 1;
+                foreach (var q in Model.Questions)
+                {
+                    <div class="card border-0 shadow-sm rounded-4 mb-3 p-3">
+                        <div class="card-body">
+                            <h5 class="fw-bold text-dark mb-3">Soru @qCount</h5>
+
+                            <div class="text-center mb-3 bg-light p-3 rounded-4 border">
+                                <img src="@q.ImageUrl" alt="Soru Görseli" class="img-fluid rounded shadow-sm" style="max-height: 220px; object-fit: contain;" />
+                            </div>
+
+                            <div class="row g-2">
+                                <div class="col-6"><div class="p-2 rounded-3 border @(q.CorrectAnswer == "A" ? "bg-success text-white border-success fw-bold" : "bg-light")">A) @q.OptionA</div></div>
+                                <div class="col-6"><div class="p-2 rounded-3 border @(q.CorrectAnswer == "B" ? "bg-success text-white border-success fw-bold" : "bg-light")">B) @q.OptionB</div></div>
+                                <div class="col-6"><div class="p-2 rounded-3 border @(q.CorrectAnswer == "C" ? "bg-success text-white border-success fw-bold" : "bg-light")">C) @q.OptionC</div></div>
+                                <div class="col-6"><div class="p-2 rounded-3 border @(q.CorrectAnswer == "D" ? "bg-success text-white border-success fw-bold" : "bg-light")">D) @q.OptionD</div></div>
+                            </div>
+                        </div>
+                    </div>
+                    qCount++;
+                }
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center sticky-top" style="top: 20px;">
+                <h5 class="fw-bold text-dark mb-3">🛡️ Yönetici Kararı</h5>
+                <p class="text-muted small mb-4">Soruları incelediyseniz quizi yayına alabilir veya tamamen reddedebilirsiniz.</p>
+                <div class="d-grid gap-2">
+                    <a href="/Admin/Approve?id=@Model.Id" class="btn btn-success btn-lg fw-bold rounded-3">✅ Quizi Onayla ve Yayınla</a>
+                    <a href="/Admin/Reject?id=@Model.Id" class="btn btn-danger btn-lg fw-bold rounded-3">❌ Quizi Reddet</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

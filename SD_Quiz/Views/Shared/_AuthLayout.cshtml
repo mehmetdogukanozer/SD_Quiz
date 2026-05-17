@@ -1,0 +1,86 @@
+﻿@{
+    // Renk verilerini sayfalardan güvenle string olarak alıyoruz
+    var bgGradient = ViewData["BgGradient"]?.ToString() ?? "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+    var primaryColor = ViewData["PrimaryColor"]?.ToString() ?? "#764ba2";
+    var shadowColor = ViewData["ShadowColor"]?.ToString() ?? "rgba(118, 75, 162, 0.4)";
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SD_Quiz</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <style>
+            body, html {
+                height: 100%;
+                margin: 0;
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: var(--bg-gradient);
+                overflow: hidden;
+            }
+
+            .auth-container {
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .auth-card {
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                backdrop-filter: blur(5px);
+                border: 1px solid rgba(255,255,255,0.3);
+                width: 100%;
+                max-width: 400px;
+                padding: 2rem;
+            }
+
+            .auth-logo {
+                font-size: 2.5rem;
+                font-weight: bold;
+                color: var(--primary-color);
+                text-align: center;
+                margin-bottom: 1.5rem;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            }
+
+            .form-control {
+                border-radius: 8px;
+                padding: 0.75rem;
+                border: 1px solid #ddd;
+            }
+
+                .form-control:focus {
+                    box-shadow: 0 0 0 0.25rem rgba(118, 75, 162, 0.15);
+                    border-color: var(--primary-color);
+                }
+
+            .btn-auth {
+                background: var(--bg-gradient);
+                border: none;
+                color: white;
+                padding: 0.75rem;
+                border-radius: 8px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+            }
+
+                .btn-auth:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 5px 15px var(--shadow-color);
+                    color: white;
+                }
+    </style>
+</head>
+<body style="--bg-gradient: @bgGradient; --primary-color: @primaryColor; --shadow-color: @shadowColor;">
+    <div class="auth-container">
+        @RenderBody()
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

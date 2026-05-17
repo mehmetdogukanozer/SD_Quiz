@@ -15,7 +15,6 @@ namespace SD_Quiz.Controllers
             _context = context;
         }
 
-        // Giriş yapan kişi admin mi kontrolü
         private bool IsAdmin()
         {
             return HttpContext.Session.GetString("IsAdmin") == "True";
@@ -25,13 +24,27 @@ namespace SD_Quiz.Controllers
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
 
-            // Onay bekleyen quizleri ve soru sayılarını çekiyoruz
+            // Sadece durumu "Pending" (Beklemede) olan istekleri getiriyoruz
             var pendingQuizzes = _context.Categories
                 .Include(c => c.Questions)
-                .Where(c => c.IsApproved == false)
+                .Where(c => c.Status == "Pending")
                 .ToList();
 
             return View(pendingQuizzes);
+        }
+
+        // YENİ: Adminin Onay Öncesi Quiz Sorularını Görebileceği Önizleme Aksiyonu
+        public IActionResult Preview(int id)
+        {
+            if (!IsAdmin()) return RedirectToAction("Index", "Home");
+
+            var category = _context.Categories
+                .Include(c => c.Questions)
+                .FirstOrDefault(c => c.Id == id);
+
+            if (category == null) return NotFound();
+
+            return View(category); // Admin/Preview.cshtml sayfasına modeli yolluyoruz
         }
 
         // Quizi Onayla
@@ -43,13 +56,14 @@ namespace SD_Quiz.Controllers
             if (category != null)
             {
                 category.IsApproved = true;
+                category.Status = "Approved"; // Durumu Onaylandı yap
                 _context.SaveChanges();
-                TempData["Success"] = $"'{category.Name}' başarıyla yayına alındı!";
+                TempData["Success"] = $"'{category.Name}' başarıyla onaylandı ve yayına alındı!";
             }
             return RedirectToAction("Index");
         }
 
-        // Quizi Reddet ve Sil
+        // Quizi Reddet (Silme, Durumunu Değiştir)
         public IActionResult Reject(int id)
         {
             if (!IsAdmin()) return RedirectToAction("Index", "Home");
@@ -57,9 +71,10 @@ namespace SD_Quiz.Controllers
             var category = _context.Categories.Find(id);
             if (category != null)
             {
-                _context.Categories.Remove(category); // Sorularıyla beraber silinir
+                category.IsApproved = false;
+                category.Status = "Rejected"; // Durumu Reddedildi yap (Kullanıcı görsün diye silmiyoruz)
                 _context.SaveChanges();
-                TempData["Warning"] = "Quiz reddedildi ve silindi.";
+                TempData["Warning"] = $"'{category.Name}' isimli quiz yayın isteği reddedildi.";
             }
             return RedirectToAction("Index");
         }

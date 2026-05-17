@@ -1,41 +1,38 @@
 ﻿@{
+    // KRİTİK AYAR: Bu sayfa artık menülü ana layout'u değil, yeni auth layout'u kullanacak.
+    Layout = "_AuthLayout";
     ViewData["Title"] = "Giriş Yap";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white text-center">
-                <h3>SD_Quiz - Giriş Yap</h3>
-            </div>
-            <div class="card-body">
+<div class="auth-card">
+    <div class="auth-logo">SD_Quiz 🧠</div>
+    <h4 class="text-center text-muted mb-4">Hoş Geldiniz</h4>
 
-                @if (ViewBag.Error != null)
-                {
-                    <div class="alert alert-danger text-center">
-                        @ViewBag.Error
-                    </div>
-                }
-
-                <form asp-action="Login" method="post">
-                    <div class="form-group mb-3">
-                        <label class="form-label">Kullanıcı Adı</label>
-                        <input name="username" class="form-control" placeholder="Kullanıcı adınız" required />
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label class="form-label">Şifre</label>
-                        <input name="password" type="password" class="form-control" placeholder="Şifreniz" required />
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Giriş Yap</button>
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer text-center">
-                <a asp-action="Register" class="text-decoration-none">Hesabın yok mu? Yeni Hesap Aç</a>
-            </div>
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger text-center p-2 small animated shake">
+            @ViewBag.Error
         </div>
+    }
+
+    <form asp-action="Login" method="post">
+        <div class="mb-3">
+            <label class="form-label text-muted small">Kullanıcı Adı</label>
+            <input name="username" class="form-control" placeholder="Kullanıcı adınız" required autofocus />
+        </div>
+
+        <div class="mb-4">
+            <label class="form-label text-muted small">Şifre</label>
+            <input name="password" type="password" class="form-control" placeholder="Şifreniz" required />
+        </div>
+
+        <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-auth btn-lg">Giriş Yap</button>
+        </div>
+    </form>
+
+    <div class="text-center mt-4 small">
+        <span class="text-muted">Hesabın yok mu?</span>
+        <a asp-action="Register" class="text-decoration-none fw-bold" style="color: #764ba2;">Yeni Hesap Aç</a>
     </div>
 </div>

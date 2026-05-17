@@ -1,38 +1,39 @@
 ﻿@model SD_Quiz.Models.User
 
 @{
+    // Sayfanın şablonunu ve renk paletini belirleyen kritik başlık bloğu
+    Layout = "_AuthLayout";
     ViewData["Title"] = "Kayıt Ol";
+
+    ViewData["BgGradient"] = "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)";
+    ViewData["PrimaryColor"] = "#11998e";
+    ViewData["ShadowColor"] = "rgba(17, 153, 142, 0.4)";
 }
 
-<div class="row justify-content-center mt-5">
-    <div class="col-md-4">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white text-center">
-                <h3>SD_Quiz - Kayıt Ol</h3>
-            </div>
-            <div class="card-body">
-                <form asp-action="Register" method="post">
+<div class="auth-card">
+    <div class="auth-logo">SD_Quiz 🧠</div>
+    <h4 class="text-center text-muted mb-4">Kayıt Ol</h4>
 
-                    <div class="form-group mb-3">
-                        <label asp-for="Username" class="form-label">Kullanıcı Adı</label>
-                        <input asp-for="Username" class="form-control" placeholder="Kullanıcı adınızı girin" />
-                        <span asp-validation-for="Username" class="text-danger"></span>
-                    </div>
-
-                    <div class="form-group mb-3">
-                        <label asp-for="Password" class="form-label">Şifre</label>
-                        <input asp-for="Password" type="password" class="form-control" placeholder="Şifrenizi girin" />
-                        <span asp-validation-for="Password" class="text-danger"></span>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success">Kayıt Ol</button>
-                    </div>
-                </form>
-            </div>
-            <div class="card-footer text-center">
-                <a asp-action="Login" class="text-decoration-none">Zaten hesabın var mı? Giriş Yap</a>
-            </div>
+    <form asp-action="Register" method="post">
+        <div class="mb-3">
+            <label asp-for="Username" class="form-label text-muted small">Kullanıcı Adı</label>
+            <input asp-for="Username" class="form-control" placeholder="Bir kullanıcı adı seçin" required autofocus />
+            <span asp-validation-for="Username" class="text-danger small"></span>
         </div>
+
+        <div class="mb-4">
+            <label asp-for="Password" class="form-label text-muted small">Şifre</label>
+            <input asp-for="Password" type="password" class="form-control" placeholder="Güçlü bir şifre girin" required />
+            <span asp-validation-for="Password" class="text-danger small"></span>
+        </div>
+
+        <div class="d-grid mb-3">
+            <button type="submit" class="btn btn-auth btn-lg">Kayıt Ol ve Başla</button>
+        </div>
+    </form>
+
+    <div class="text-center mt-4 small">
+        <span class="text-muted">Zaten hesabın var mı?</span>
+        <a asp-action="Login" class="text-decoration-none fw-bold" style="color: #11998e;">Giriş Yap</a>
     </div>
 </div>
